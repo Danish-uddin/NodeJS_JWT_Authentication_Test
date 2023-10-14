@@ -22,6 +22,7 @@
             <div>
                 <button onclick="login()">Login</button>
                 <button onclick="getDashboard()">Get Dashboard</button>
+                <button onclick="getSettings()">Get Settings</button> <!--Added button for settings-->
             </div>
         </main>
     </div>
@@ -51,11 +52,47 @@
                 if(res && res.data && res.data.success){
                     document.querySelector('h1.row').innerHTML = 'Dashboard';
                     document.querySelector('main').innerHTML = res.data.myContent;
+                    history.pushState(null, null, '/api/dashboard'); //updating url
+                }
+            }).catch(error => { //added this block for handling expired tokens
+                if (error.response && error.response.status === 401) {
+                    console.log('Token Expired')
+                    localStorage.removeItem('jwt');
+                    window.location.href = '/';
                 }
             });
         }
 
-        
+        //added code for redirection to settings
+        function getSettings(){
+            axios.get('/api/settings', {
+                headers:{
+                    'Authorization': `Bearer ${localStorage.getItem('jwt')}`
+                }
+            }).then(res => {
+                if(res && res.data && res.data.success){
+                    document.querySelector('h1.row').innerHTML = 'Settings';
+                    document.querySelector('main').innerHTML = res.data.myContent;
+                    history.pushState(null, null, '/api/settings'); //updating url
+                }
+            }).catch(error => { //added this block for handling expired tokens
+                if (error.response && error.response.status === 401) {
+                    console.log('Token Expired')
+                    localStorage.removeItem('jwt');
+                    window.location.href = '/';
+                }
+            });
+        }
+
+        /* Commented onload, so that we can direct to settings page as well
+        function onLoad() {
+            const token = localStorage.getItem('jwt')
+            if (token) {
+                getDashboard();
+            }
+        }
+        onLoad();
+        */
     </script>
 </body>
 </html>
